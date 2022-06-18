@@ -1,5 +1,4 @@
 import pygame
-from random import randint
 
 class Main():
     def __init__(self):
@@ -21,7 +20,7 @@ class Main():
         self.paikka1 = self.korkeus / 2 - self.kuvat[0].get_height() / 2
         self.paikka2 = self.korkeus / 2 - self.kuvat[1].get_height() / 2
 
-        self.palloX, self.palloY = self.leveys / 2 - self.kuvat[2].get_width() / 2, self.korkeus / 2 - self.kuvat[2].get_height() / 2
+        self.palloX, self.palloY = self.leveys / 2, self.korkeus / 2
 
         self.ylos1 = False
         self.alas1 = False
@@ -29,14 +28,16 @@ class Main():
         self.ylos2 = False
         self.alas2 = False
 
-        self.nopeusx = 4
-        self.nopeusy = 4
+        self.nopeusx = 6
+        self.nopeusy = 6
+
+        self.pallo_koko = 9
 
         self.silmukka()
 
     def lataa_kuvat(self):
         self.kuvat = []
-        for kuva in ["lauta1.png", "lauta2.png", "pallo.png"]:
+        for kuva in ["lauta1.png", "lauta2.png"]:
             self.kuvat.append(pygame.image.load(kuva))
 
     def pelaaja1(self):
@@ -58,25 +59,25 @@ class Main():
 
         self.palloX += self.nopeusx
         self.palloY += self.nopeusy
-        
-        if self.kuvat[2].get_width() + self.palloY >= self.korkeus or self.palloY <= 0:
-            self.nopeusy = - self.nopeusy  
 
-        if tormays2.collidepoint(self.palloX + self.kuvat[2].get_width(), self.palloY):
+        if self.palloY + self.pallo_koko >= self.korkeus or self.palloY <= 0:
+            self.nopeusy = - self.nopeusy
+        
+        if tormays2.collidepoint(self.palloX + self.pallo_koko / 2, self.palloY):
             self.nopeusx = - self.nopeusx
 
-        if tormays1.collidepoint(self.palloX + self.kuvat[1].get_width(), self.palloY):
+        if tormays1.collidepoint(self.palloX + self.pallo_koko / 2, self.palloY):
             self.nopeusx = - self.nopeusx
 
         if self.palloX <= 0:
             self.pisteet2 += 1
-            self.palloX, self.palloY = self.leveys / 2 - self.kuvat[2].get_width() / 2, self.korkeus / 2 - self.kuvat[2].get_height() / 2
+            self.palloX, self.palloY = self.leveys / 2, self.korkeus / 2
             if self.pisteet2 == 11:
                 self.lopetusnaytto()
-        
-        if self.palloX + self.kuvat[2].get_width() / 2 >= 640:
+
+        if self.palloX + self.pallo_koko >= 640:
             self.pisteet1 += 1
-            self.palloX, self.palloY = self.leveys / 2 - self.kuvat[2].get_width() / 2, self.korkeus / 2 - self.kuvat[2].get_height() / 2
+            self.palloX, self.palloY = self.leveys / 2, self.korkeus / 2
             if self.pisteet1 == 11:
                 self.lopetusnaytto()
 
@@ -87,7 +88,7 @@ class Main():
     def lopetusnaytto(self):
 
         pelaa_uudestaan_valkoinen = self.fontti_suuri.render("Pelaa uudestaan", True, (255, 255, 255))
-        pelaa_uudestaan_punainen = self.fontti_suuri.render("Pelaa uudestaan", True, (255, 0, 0))
+        pelaa_uudestaan_musta = self.fontti_suuri.render("Pelaa uudestaan", True, (0, 0, 0))
 
         teksti = pelaa_uudestaan_valkoinen.get_rect(center = (self.leveys / 2, self.korkeus / 2))
 
@@ -106,7 +107,7 @@ class Main():
             self.naytto.fill((54, 69, 79))
 
             if teksti.collidepoint(pygame.mouse.get_pos()):
-                self.naytto.blit(pelaa_uudestaan_punainen, (self.leveys / 2 - pelaa_uudestaan_punainen.get_width() / 2, self.korkeus / 2 - pelaa_uudestaan_punainen.get_height() / 2))
+                self.naytto.blit(pelaa_uudestaan_musta, (self.leveys / 2 - pelaa_uudestaan_musta.get_width() / 2, self.korkeus / 2 - pelaa_uudestaan_musta.get_height() / 2))
             else:
                 self.naytto.blit(pelaa_uudestaan_valkoinen, (self.leveys / 2 - pelaa_uudestaan_valkoinen.get_width() / 2, self.korkeus / 2 - pelaa_uudestaan_valkoinen.get_height() / 2))
 
@@ -159,11 +160,11 @@ class Main():
 
         self.naytto.blit(self.kuvat[0], (15, self.paikka1))
         self.naytto.blit(self.kuvat[1], (self.leveys - self.kuvat[1].get_width() - 15, self.paikka2))
-        self.naytto.blit(self.kuvat[2], (self.palloX, self.palloY))
         self.naytto.blit(teksti1, (self.leveys / 2 - teksti1.get_width() - 20, teksti1.get_height() / 5))
         self.naytto.blit(teksti2, (self.leveys / 2 + 20, teksti2.get_height() / 5))
 
-        pygame.draw.line(self.naytto, (255, 255, 255), (320, 0), (320, 480), 5)
+        pygame.draw.line(self.naytto, (255, 255, 255), (self.leveys / 2, 0), (self.leveys / 2, self.korkeus), 5)
+        pygame.draw.circle(self.naytto, (255, 255, 255), (self.palloX, self.palloY), self.pallo_koko)
 
         pygame.display.flip()
 
