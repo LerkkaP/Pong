@@ -7,7 +7,7 @@ class Main():
 
         pygame.display.set_caption("Pong")
 
-        self.fontti_pieni = pygame.font.SysFont("Segoe UI", 24, bold=True)
+        self.fontti_pieni = pygame.font.SysFont("Segoe UI", 27, bold=True)
         self.fontti_suuri = pygame.font.SysFont("Segoe UI", 50, bold=True)
 
         self.leveys, self.korkeus = 640, 480
@@ -16,6 +16,7 @@ class Main():
         self.kello = pygame.time.Clock()
 
         self.lataa_kuvat()
+        self.pisteet()
 
         self.paikka1 = self.korkeus / 2 - self.kuvat[0].get_height() / 2
         self.paikka2 = self.korkeus / 2 - self.kuvat[1].get_height() / 2
@@ -52,8 +53,8 @@ class Main():
 
     def pallo_liike(self):
 
-        tormays1 = self.kuvat[0].get_rect(center = (19 + self.kuvat[0].get_width(), self.paikka1))
-        tormays2 = self.kuvat[1].get_rect(center = (self.leveys - self.kuvat[1].get_width() - 9.1, self.paikka2))
+        tormays1 = self.kuvat[0].get_rect(center = (19 + self.kuvat[0].get_width(), self.paikka1 + self.kuvat[0].get_height() / 2))
+        tormays2 = self.kuvat[1].get_rect(center = (self.leveys - self.kuvat[1].get_width() - 9.1, self.paikka2 + self.kuvat[1].get_height() / 2))
 
         self.palloX += self.nopeusx
         self.palloY += self.nopeusy
@@ -67,12 +68,28 @@ class Main():
         if tormays1.collidepoint(self.palloX + self.kuvat[1].get_width(), self.palloY):
             self.nopeusx = - self.nopeusx
 
+        if self.palloX <= 0:
+            self.pisteet2 += 1
+            self.palloX, self.palloY = self.leveys / 2 - self.kuvat[2].get_width() / 2, self.korkeus / 2 - self.kuvat[2].get_height() / 2
+            if self.pisteet2 == 11:
+                self.lopetusnaytto()
+        
+        if self.palloX + self.kuvat[2].get_width() / 2 >= 640:
+            self.pisteet1 += 1
+            self.palloX, self.palloY = self.leveys / 2 - self.kuvat[2].get_width() / 2, self.korkeus / 2 - self.kuvat[2].get_height() / 2
+            if self.pisteet1 == 11:
+                self.lopetusnaytto()
+
+    def pisteet(self):
+        self.pisteet1 = 0
+        self.pisteet2 = 0
+
     def lopetusnaytto(self):
 
         pelaa_uudestaan_valkoinen = self.fontti_suuri.render("Pelaa uudestaan", True, (255, 255, 255))
-        pelaa_uudestaan_musta = self.fontti_suuri.render("Pelaa uudestaan", True, (255, 0, 0))
+        pelaa_uudestaan_punainen = self.fontti_suuri.render("Pelaa uudestaan", True, (255, 0, 0))
 
-        teksti = pelaa_uudestaan_valkoinen.get_rect(center = (self.leveys / 2, self.korkeus / 1.6))
+        teksti = pelaa_uudestaan_valkoinen.get_rect(center = (self.leveys / 2, self.korkeus / 2))
 
         while True:
             for tapahtuma in pygame.event.get():
@@ -86,12 +103,12 @@ class Main():
                 if tapahtuma.type == pygame.QUIT:
                     exit()
 
-            self.naytto.fill((0, 0, 0))
+            self.naytto.fill((54, 69, 79))
 
             if teksti.collidepoint(pygame.mouse.get_pos()):
-                self.naytto.blit(pelaa_uudestaan_musta, (self.leveys / 2 - pelaa_uudestaan_musta.get_width() / 2, self.korkeus / 1.5 - pelaa_uudestaan_musta.get_height()))
+                self.naytto.blit(pelaa_uudestaan_punainen, (self.leveys / 2 - pelaa_uudestaan_punainen.get_width() / 2, self.korkeus / 2 - pelaa_uudestaan_punainen.get_height() / 2))
             else:
-                self.naytto.blit(pelaa_uudestaan_valkoinen, (self.leveys / 2 - pelaa_uudestaan_valkoinen.get_width() / 2, self.korkeus / 1.5 - pelaa_uudestaan_valkoinen.get_height()))
+                self.naytto.blit(pelaa_uudestaan_valkoinen, (self.leveys / 2 - pelaa_uudestaan_valkoinen.get_width() / 2, self.korkeus / 2 - pelaa_uudestaan_valkoinen.get_height() / 2))
 
             pygame.display.flip()
 
@@ -115,7 +132,6 @@ class Main():
                     self.alas2 = True
                 if tapahtuma.key == pygame.K_ESCAPE:
                     self.lopetusnaytto()
-                    #exit()
 
             if tapahtuma.type == pygame.KEYUP:
                 if tapahtuma.key == pygame.K_UP:
@@ -132,7 +148,10 @@ class Main():
 
     def piirra_naytto(self):
 
-        self.naytto.fill((0, 0, 0))
+        teksti1 = self.fontti_suuri.render(str(self.pisteet1), True, (255, 255, 255))
+        teksti2 = self.fontti_suuri.render(str(self.pisteet2), True, (255, 255, 255))
+
+        self.naytto.fill((54, 69, 79))
 
         self.pelaaja1()
         self.pelaaja2()
@@ -141,6 +160,10 @@ class Main():
         self.naytto.blit(self.kuvat[0], (15, self.paikka1))
         self.naytto.blit(self.kuvat[1], (self.leveys - self.kuvat[1].get_width() - 15, self.paikka2))
         self.naytto.blit(self.kuvat[2], (self.palloX, self.palloY))
+        self.naytto.blit(teksti1, (self.leveys / 2 - teksti1.get_width() - 20, teksti1.get_height() / 5))
+        self.naytto.blit(teksti2, (self.leveys / 2 + 20, teksti2.get_height() / 5))
+
+        pygame.draw.line(self.naytto, (255, 255, 255), (320, 0), (320, 480), 5)
 
         pygame.display.flip()
 
